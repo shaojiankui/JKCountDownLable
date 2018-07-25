@@ -312,6 +312,7 @@
 				A2027A671B83283700E1D53D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

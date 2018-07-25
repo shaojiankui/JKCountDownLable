@@ -10,56 +10,56 @@
 
 @implementation JKCountDownLable
 
--(void)willMoveToSuperview:(UIView *)newSuperview{
-    if (newSuperview) {
-        self.font  = [UIFont systemFontOfSize:self.font.pointSize];
-        self.text= @"000 : 00 : 00 : 00";
-    }
-}
 
--(void)changeText{
+- (void)changeText{
     NSDate *date = [NSDate date];
-    //    NSTimeZone *zone = [NSTimeZone systemTimeZone];
-    //    NSInteger interval = [zone secondsFromGMTForDate: date];
-    //    NSDate *localeDate = [date  dateByAddingTimeInterval: interval];
+ 
+    NSTimeInterval deltaTime = [_endTime timeIntervalSinceDate:date];
     
-    NSTimeInterval deltaTime = [_timeFirst timeIntervalSinceDate:date];
-    self.text =  [self getTimeString:deltaTime];
+    NSDictionary *DHMSInfo =  [[self class] getDHMSInfoWithSeconds:deltaTime];
+    
+    NSInteger D = [[DHMSInfo objectForKey:@"D"] integerValue];
+    NSInteger H = [[DHMSInfo objectForKey:@"H"] integerValue];
+    NSInteger M = [[DHMSInfo objectForKey:@"M"] integerValue];
+    NSInteger S = [[DHMSInfo objectForKey:@"S"] integerValue];
 
-    if (_countDownLableChange) {
-        _countDownLableChange(_timeFirst,deltaTime,self.text);
-    }
+    NSString *defaultText = [NSString stringWithFormat:@"%0.3zd :%0.2zd : %0.2zd : %0.2zd", D,H,M,S];
+
+    
     if (deltaTime <=0.0) {
         [self stop];
         return;
+    }else{
+        if (_countDownLableChange) {
+            self.text  = _countDownLableChange(self,_endTime,deltaTime,DHMSInfo,defaultText);
+        }else{
+            self.text = defaultText;
+        }
     }
-    //NSLog(@"deltaTime = %f",deltaTime);
 }
--(NSString*)getTimeString:(NSTimeInterval)seconds{
++ (NSDictionary*)getDHMSInfoWithSeconds:(NSTimeInterval)seconds{
   
     NSInteger day = seconds/86400;
     NSInteger hour = (seconds-(day*86400))/3600;
-    NSInteger minus = (seconds-(day*86400)-(hour*3600))/60;
-    NSInteger second = (seconds-(day*86400)-(hour*3600)-minus*60);
-
-    return [NSString stringWithFormat:@"%0.3zd :%0.2zd : %0.2zd : %0.2zd", day,hour,minus,second];
+    NSInteger minute = (seconds-(day*86400)-(hour*3600))/60;
+    NSInteger second = (seconds-(day*86400)-(hour*3600)-minute*60);
+ 
+    return  @{@"D":@(day),@"H":@(hour),@"M":@(minute),@"S":@(second)};
 }
 
--(void)countDownWithDate:(NSDate*)date{
+- (void)countDownWithDate:(NSDate*)date{
     [self stop];
-    _timeFirst = date;
+    _endTime = date;
     _timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(changeText) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop]addTimer:_timer forMode:NSRunLoopCommonModes];
 }
--(void)countDownWithTimeInterval:(NSTimeInterval)timeInterval{
+- (void)countDownWithTimeInterval:(NSTimeInterval)timeInterval{
     [self stop];
-    _timeFirst = [NSDate dateWithTimeIntervalSince1970:timeInterval];
+    _endTime = [NSDate dateWithTimeIntervalSince1970:timeInterval];
     _timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(changeText) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop]addTimer:_timer forMode:NSRunLoopCommonModes];
 }
--(void)setCountDownLableChange:(CountDownLableChange)countDownLableChange{
-    _countDownLableChange = [countDownLableChange copy];
-}
+
 - (void)stop{
     if (_timer) {
         if ([_timer respondsToSelector:@selector(isValid)])
@@ -67,9 +67,24 @@
             if ([_timer isValid])
             {
                 [_timer invalidate];
-                self.text= @"000 : 00 : 00 : 00";
+                if (_countDownLableFinished)
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        self.text = _countDownLableFinished(self,_endTime,0,@"000 : 00 : 00 : 00");
+                    });
+                }
+                else
+                {
+                    self.text= @"000 : 00 : 00 : 00";
+                }
             }
         }
     }
+}
+- (void)countDownLableChange:(CountDownLableChange)countDownLableChange{
+    _countDownLableChange = [countDownLableChange copy];
+}
+- (void)countDownLableFinished:(CountDownLableChange)countDownLableFinished{
+    _countDownLableFinished = [countDownLableFinished copy];
 }
 @end

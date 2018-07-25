@@ -18,13 +18,29 @@
     [super viewDidLoad];
   
     // Do any additional setup after loading the view, typically from a nib.
-    [self.countDownLable countDownWithDate:[NSDate dateWithTimeIntervalSinceNow:864000]];
+    //设置最原始的text
+    self.countDownLable.text  = @"00 : 00 : 00";
+    [self.countDownLable countDownWithDate:[NSDate dateWithTimeIntervalSinceNow:666]];
     
-    [self.countDownLable countDownWithTimeInterval:1470614888];
-    
-    [self.countDownLable setCountDownLableChange:^(NSDate *startTime, double time, NSString *text) {
-        NSLog(@"text%@",text);
+//    [self.countDownLable countDownWithTimeInterval:1470614888];
+    [self.countDownLable countDownLableChange:^NSString *(JKCountDownLable *countDownLable, NSDate *endTime, NSTimeInterval second,NSDictionary *DHMSInfo, NSString *defaultText) {
+        
+        //自己格式化
+        NSInteger D = [[DHMSInfo objectForKey:@"D"] integerValue];
+        NSInteger H = [[DHMSInfo objectForKey:@"H"] integerValue];
+        NSInteger M = [[DHMSInfo objectForKey:@"M"] integerValue];
+        NSInteger S = [[DHMSInfo objectForKey:@"S"] integerValue];
+        
+        return [NSString stringWithFormat:@"%0.2zd : %0.2zd : %0.2zd", H,M,S];
 
+//        //使用控件内的默认格式化后的文本
+//        return defaultText;
+    }];
+    [self.countDownLable countDownLableFinished:^NSString *(JKCountDownLable *countDownLable, NSDate *endTime, NSTimeInterval seconds, NSDictionary *DHMSInfo, NSString *defaultText) {
+        //自定义倒计时结束标题
+        return @"00 : 00 : 00";
+        //使用控件内的默认格式化后的文本
+        //return defaultText;
     }];
 
 }
