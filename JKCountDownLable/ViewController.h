@@ -11,6 +11,7 @@
 @interface ViewController : UIViewController
 
 @property (weak, nonatomic) IBOutlet JKCountDownLable *countDownLable;
+- (IBAction)infoTouched:(id)sender;
 
 @end
 

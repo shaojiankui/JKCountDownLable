@@ -50,4 +50,11 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (IBAction)infoTouched:(id)sender {
+    NSLog(@"beginTime:%@",[self.countDownLable beginTime]);
+    NSLog(@"endTime:%@",[self.countDownLable endTime]);
+
+    NSLog(@"secondsPassed:%lf",[self.countDownLable secondsPassed]);
+    NSLog(@"secondsRemain:%lf",[self.countDownLable secondsRemain]);
+}
 @end

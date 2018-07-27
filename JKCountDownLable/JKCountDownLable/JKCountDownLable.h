@@ -17,9 +17,19 @@ typedef NSString* (^countDownLableFinished)(JKCountDownLable *countDownLable,NSD
 {
     NSTimer *_timer;
     NSDate *_endTime;
+    NSDate *_beginTime;
+
     CountDownLableChange _countDownLableChange;
     countDownLableFinished _countDownLableFinished;
 }
+//倒计时开始时间
+- (NSDate*)beginTime;
+//倒计时结束时间
+- (NSDate*)endTime;
+//倒计时过去了N秒
+- (NSTimeInterval)secondsPassed;
+//倒计时还有N秒
+- (NSTimeInterval)secondsRemain;
 ///截止日期
 - (void)countDownWithDate:(NSDate*)date;
 ///距离当前时间timeInterval秒的截止日期

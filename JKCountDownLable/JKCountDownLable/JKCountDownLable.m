@@ -9,8 +9,18 @@
 #import "JKCountDownLable.h"
 
 @implementation JKCountDownLable
-
-
+- (NSDate*)beginTime{
+    return _beginTime;
+}
+- (NSDate*)endTime{
+    return _endTime;
+}
+- (NSTimeInterval)secondsPassed{
+    return [[NSDate date] timeIntervalSinceDate:_beginTime];
+}
+- (NSTimeInterval)secondsRemain{
+    return [_endTime timeIntervalSinceDate:[NSDate date]];
+}
 - (void)changeText{
     NSDate *date = [NSDate date];
  
@@ -50,12 +60,14 @@
 - (void)countDownWithDate:(NSDate*)date{
     [self stop];
     _endTime = date;
+    _beginTime= [NSDate date];
     _timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(changeText) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop]addTimer:_timer forMode:NSRunLoopCommonModes];
 }
 - (void)countDownWithTimeInterval:(NSTimeInterval)timeInterval{
     [self stop];
     _endTime = [NSDate dateWithTimeIntervalSince1970:timeInterval];
+    _beginTime= [NSDate date];
     _timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(changeText) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop]addTimer:_timer forMode:NSRunLoopCommonModes];
 }
