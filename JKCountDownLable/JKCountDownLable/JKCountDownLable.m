@@ -7,6 +7,11 @@
 //
 
 #import "JKCountDownLable.h"
+@interface NSTimer (JKCountDownLabelBlocksSupport)
++ (NSTimer *)jkcdl_scheduledTimerWithTimeInterval:(NSTimeInterval)interval
+                                           block:(void(^)(void))block
+                                         repeats:(BOOL)repeats;
+@end
 
 @implementation JKCountDownLable
 - (NSDate*)beginTime{
@@ -61,14 +66,23 @@
     [self stop];
     _endTime = date;
     _beginTime= [NSDate date];
-    _timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(changeText) userInfo:nil repeats:YES];
+    __weak typeof(self) weakSelf = self;
+    _timer = [NSTimer jkcdl_scheduledTimerWithTimeInterval:1.0 block:^{
+        typeof(weakSelf) strongSelf = weakSelf;
+        [strongSelf changeText];
+    } repeats:YES];
+    
     [[NSRunLoop currentRunLoop]addTimer:_timer forMode:NSRunLoopCommonModes];
 }
 - (void)countDownWithTimeInterval:(NSTimeInterval)timeInterval{
     [self stop];
     _endTime = [NSDate dateWithTimeIntervalSince1970:timeInterval];
     _beginTime= [NSDate date];
-    _timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(changeText) userInfo:nil repeats:YES];
+    __weak typeof(self) weakSelf = self;
+    _timer = [NSTimer jkcdl_scheduledTimerWithTimeInterval:1.0 block:^{
+        typeof(weakSelf) strongSelf = weakSelf;
+        [strongSelf changeText];
+    } repeats:YES];
     [[NSRunLoop currentRunLoop]addTimer:_timer forMode:NSRunLoopCommonModes];
 }
 
@@ -98,5 +112,24 @@
 }
 - (void)countDownLableFinished:(CountDownLableChange)countDownLableFinished{
     _countDownLableFinished = [countDownLableFinished copy];
+}
+@end
+
+@implementation NSTimer (JKCountDownLabelBlocksSupport)
++ (NSTimer *)jkcdl_scheduledTimerWithTimeInterval:(NSTimeInterval)interval
+                                           block:(void(^)(void))block
+                                         repeats:(BOOL)repeats
+{
+    return [self scheduledTimerWithTimeInterval:interval
+                                         target:self
+                                       selector:@selector(jkcdl_blockInvoke:)
+                                       userInfo:[block copy]
+                                        repeats:repeats];
+}
++ (void)jkcdl_blockInvoke:(NSTimer *)timer {
+    void (^block)(void) = timer.userInfo;
+    if(block) {
+        block();
+    }
 }
 @end
